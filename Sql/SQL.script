@@ -1,0 +1,160 @@
+DROP DATABASE IF EXISTS beautystore;
+CREATE DATABASE beautystore;
+USE beautystore;
+
+--  ADMIN 
+CREATE TABLE admin (
+    admin_id INT AUTO_INCREMENT PRIMARY KEY,
+    admin_username VARCHAR(50) NOT NULL UNIQUE,
+    admin_password VARCHAR(255) NOT NULL,
+    first_name VARCHAR(50) NOT NULL,
+    last_name VARCHAR(50) NOT NULL,
+    email VARCHAR(100) NOT NULL UNIQUE
+) ENGINE=InnoDB;
+
+--  CUSTOMER 
+CREATE TABLE customer (
+    customer_id INT AUTO_INCREMENT PRIMARY KEY,
+    customer_username VARCHAR(50) NOT NULL UNIQUE,
+    customer_password VARCHAR(255) NOT NULL,
+    discount BOOLEAN DEFAULT FALSE,
+    first_name VARCHAR(50) NOT NULL,
+    last_name VARCHAR(50) NOT NULL,
+    email VARCHAR(100) NOT NULL UNIQUE,
+    address VARCHAR(255) NOT NULL,
+    gender VARCHAR(20),
+    birthdate DATE,
+    phone_number VARCHAR(20)
+) ENGINE=InnoDB;
+
+--  PRODUCT 
+CREATE TABLE product (
+    product_id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    price DECIMAL(10,2) NOT NULL,
+    category VARCHAR(50) NOT NULL,
+    manufacturer VARCHAR(100),
+    subcategory VARCHAR(100),
+    description TEXT,
+    stock INT NOT NULL DEFAULT 0,
+    color VARCHAR(50),
+    weight DECIMAL(6,2),
+    warranty VARCHAR(50)
+) ENGINE=InnoDB;
+
+--  ORDERS 
+CREATE TABLE orders (
+    order_id INT AUTO_INCREMENT PRIMARY KEY,
+    customer_id INT NOT NULL,
+    order_date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (customer_id)
+        REFERENCES customer(customer_id)
+        ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+--  ORDER_DETAILS 
+CREATE TABLE order_details (
+    order_details_id INT AUTO_INCREMENT PRIMARY KEY,
+    order_id INT NOT NULL,
+    product_id INT NOT NULL,
+    quantity INT NOT NULL CHECK (quantity > 0),
+    FOREIGN KEY (order_id)
+        REFERENCES orders(order_id)
+        ON DELETE CASCADE,
+    FOREIGN KEY (product_id)
+        REFERENCES product(product_id)
+        ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+--  INVOICE 
+CREATE TABLE invoice (
+    invoice_id INT AUTO_INCREMENT PRIMARY KEY,
+    order_id INT NOT NULL UNIQUE,
+    total DECIMAL(10,2) NOT NULL,
+    invoice_date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (order_id)
+        REFERENCES orders(order_id)
+        ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+--  CART 
+CREATE TABLE cart (
+    cart_id INT AUTO_INCREMENT PRIMARY KEY,
+    customer_id INT NOT NULL,
+    product_id INT NOT NULL,
+    quantity INT NOT NULL CHECK (quantity > 0),
+    added_date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE (customer_id, product_id),
+    FOREIGN KEY (customer_id)
+        REFERENCES customer(customer_id)
+        ON DELETE CASCADE,
+    FOREIGN KEY (product_id)
+        REFERENCES product(product_id)
+        ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+--  WISHLIST 
+CREATE TABLE wishlist (
+    wishlist_id INT AUTO_INCREMENT PRIMARY KEY,
+    customer_id INT NOT NULL,
+    product_id INT NOT NULL,
+    added_date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE (customer_id, product_id),
+    FOREIGN KEY (customer_id)
+        REFERENCES customer(customer_id)
+        ON DELETE CASCADE,
+    FOREIGN KEY (product_id)
+        REFERENCES product(product_id)
+        ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+-- REVIEWS 
+CREATE TABLE reviews (
+    review_id INT AUTO_INCREMENT PRIMARY KEY,
+    product_id INT NOT NULL,
+    customer_id INT NOT NULL,
+    rating INT NOT NULL CHECK (rating BETWEEN 1 AND 5),
+    comment TEXT,
+    review_date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (product_id)
+        REFERENCES product(product_id)
+        ON DELETE CASCADE,
+    FOREIGN KEY (customer_id)
+        REFERENCES customer(customer_id)
+        ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+--  SUPPORT 
+CREATE TABLE support (
+    support_id INT AUTO_INCREMENT PRIMARY KEY,
+    customer_id INT NOT NULL,
+    subject VARCHAR(150) NOT NULL,
+    message TEXT NOT NULL,
+    status VARCHAR(50) DEFAULT 'Open',
+    submitted_date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (customer_id)
+        REFERENCES customer(customer_id)
+        ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+--  IMAGES 
+CREATE TABLE images (
+    image_id INT AUTO_INCREMENT PRIMARY KEY,
+    product_id INT NOT NULL,
+    image_url VARCHAR(255) NOT NULL,
+    is_primary BOOLEAN DEFAULT FALSE,
+    FOREIGN KEY (product_id)
+        REFERENCES product(product_id)
+        ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+--  CHARACTERISTICS 
+CREATE TABLE characteristics (
+    characteristic_id INT AUTO_INCREMENT PRIMARY KEY,
+    product_id INT NOT NULL,
+    characteristic_name VARCHAR(100) NOT NULL,
+    characteristic_value VARCHAR(255) NOT NULL,
+    FOREIGN KEY (product_id)
+        REFERENCES product(product_id)
+        ON DELETE CASCADE
+) ENGINE=InnoDB;
